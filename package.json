@@ -1,0 +1,22 @@
+{
+    "name": "Denno",
+    "version": "0.0.1", 
+	"description": "",
+	"main": "index.js",
+    "scripts": {
+        "start": "node index.js"
+    }, 
+    "dependencies": {
+        "express": "*",
+		"cron": "*",
+		"twitter":"*",
+        "body-parser":"*",
+		"moment-timezone":"*",
+		"hashmap":"*",
+		"fs-sync":"*",
+		"random-js":"*"
+    },
+    "engines": {
+    "iojs": "1.0.x"
+    }
+}
