@@ -10,7 +10,7 @@ module.exports = function Run(dir, client, owners) {
 
     var input = [];
     var output = [];
-    var line = require('fs-sync').read(dir + '/strings', 'utf8').split('\r\n');
+    var line = require('fs-sync').read(dir + '/strings', 'utf8').split('\n');
     for (var i = 0; i < line.length; i++) {
         line[i] = line[i].trim(); // remove blank
         var item = line[i].split('='); // split line to item1=item2
@@ -31,7 +31,7 @@ module.exports = function Run(dir, client, owners) {
                 client.post('statuses/update', {
                     in_reply_to_status_id: tweet.id_str,
                     status:
-                        '@' + tweet.user.screen_name + '\n' + output[outputs[Random.integer(0, outputs.length - 1)(mt)]]
+                        '@' + tweet.user.screen_name + ' ' + output[outputs[Random.integer(0, outputs.length - 1)(mt)]]
                 }, function (error, rtweet, response) {
                     if (error) console.error(error);
                     else {

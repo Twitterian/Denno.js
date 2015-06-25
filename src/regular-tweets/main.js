@@ -8,7 +8,7 @@ module.exports = function Run(dir) {
     console.log("! Tweak 'Regular-Tweets' Loading...");
     AppInfo = require('./../appinfo-loader.js').Load(dir);
 
-    var line = require('fs-sync').read(dir + '/tweets.txt', 'utf8').split('\r\n');
+    var line = require('fs-sync').read(dir + '/tweets.txt', 'utf8').split('\n');
     for (var i = 0; i < line.length; i++) {
         console.log('\t'+i+' : ' + line[i].substr(0, 40) + ' ...'); // cut string (too long. he rape my logs)
         Tweets.push(line[i].replace(/<br>/gi, '\n'));

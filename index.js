@@ -23,7 +23,7 @@ var client = new require('twitter')({
 });
 
 var Owners = [];
-var line = require('fs-sync').read('./src/owners.id_str', 'utf8').split('\r\n');
+var line = require('fs-sync').read('./src/owners.id_str', 'utf8').split('\n');
 for (var i = 0; i < line.length; i++) {
     console.log('\t' + i + ' : ' + line[i]);
     Owners.push(line[i]);
