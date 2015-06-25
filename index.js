@@ -22,10 +22,15 @@ var client = new require('twitter')({
     access_token_key: AppInfo.get('access_token_key'),
     access_token_secret: AppInfo.get('access_token_secret')
 });
+client.get('account/verify_credentials', {}, function(error, user, response){
+  if(error) throw error;
+  console.log('\t\tLogged in : ' + user.name + '(@' + user.screen_name +' ' + user.id_str + ')');  // Raw response object. 
+});
+console.log();
 
 // Load Async tweaks
 var Loader = require('./tweak-launcher.js');
-Loader.Launch('./src/regular-tweets', client);
+//Loader.Launch('./src/regular-tweets', client);
 Loader.Launch('./src/gisuktime', client);
 Loader.Launch('./src/timeline-reaction', client);
 
