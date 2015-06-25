@@ -24,10 +24,9 @@ module.exports = function Run(dir, client) {
     client.stream('user', { replies: 'all' }, function (stream) {
         stream.on('data', function (tweet) {
             if (tweet.retweeted_status == undefined) {
-                if (Owners.indexOf(tweet.user.id_str) > 0) { // is owner's tweet
+                if (Owners.indexOf(tweet.user.id_str) != -1) { // is owner's tweet
                     for (var i = 0; i < RegStrs.length; i++) {
                         if (RegStrs[i].test(tweet.text.replace(/ /g, ''))) {
-                            
                             client.post('statuses/update', {
                                 in_reply_to_status_id: tweet.id_str,
                                 status:
@@ -41,13 +40,12 @@ module.exports = function Run(dir, client) {
         });
 
         stream.on('error', function (error) {
-            //console.error(error);
+            console.error(error);
         });
     });
 }
 
-function GetGisukString()
-{
+function GetGisukString() {
     var current = require('./../syncedtime.js')();
     var target = GetNextIndipendanceDay(current);
     var ref = target.getTime() - current.getTime();
@@ -71,36 +69,30 @@ function GetGisukString()
     return str;
 }
 
-function GetNextIndipendanceDay(date)
-{
+function GetNextIndipendanceDay(date) {
     var toDormitory = false;
     var weekday = date.getDay();
     var hour = date.getHours();
     var min = date.getMinutes();
     weekday -= 1;
     if (weekday < 0) { weekday = 6; }
-    if (weekday == 4)
-    {
-        if( hour> 17 || (hour == 17 && min>= 30))
-        {
+    if (weekday == 4) {
+        if (hour > 17 || (hour == 17 && min >= 30)) {
             toDormitory = true;
         }
     }
-    else if (weekday == 5)
-    {
+    else if (weekday == 5) {
         toDormitory = true;
     }
-    else if(weekday == 6)
-    {
-        if(hour<21)
-        {
+    else if (weekday == 6) {
+        if (hour < 21) {
             toDormitory = true;
         }
     }
 
     var IndipendanceDay;
 
-    if(toDormitory==true) // goto GISUKSA;
+    if (toDormitory == true) // goto GISUKSA;
     {
         var day = date.getDate() + (6 - weekday);
         IndipendanceDay = new Date(date.getFullYear(), date.getMonth(), day, 21);
