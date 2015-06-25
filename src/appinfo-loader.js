@@ -6,7 +6,7 @@ exports.Load = function (dir) {
         line[i] = line[i].trim(); // remove blank
         var item = line[i].split('='); // split line to item1=item2
         Info.set(item[0], item[1]);
-        console.log("\t\t> " + item[0] + " : " + item[1]);
+        console.log("\t> " + item[0] + " : " + item[1]);
     }
     return Info;
 }

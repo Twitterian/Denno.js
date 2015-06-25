@@ -4,17 +4,17 @@ var Random = require('random-js');
 var mt = Random.engines.mt19937();
 mt.autoSeed();
 
-module.exports = function Run(dir, client) {
-    console.log("\tTweak 'Regular-Tweets' Loading...");
+module.exports = function Run(dir) {
+    console.log("! Tweak 'Regular-Tweets' Loading...");
     AppInfo = require('./../appinfo-loader.js').Load(dir);
 
     var line = require('fs-sync').read(dir + '/tweets.txt', 'utf8').split('\r\n');
     for (var i = 0; i < line.length; i++) {
-        console.log('\t\t'+i+' : ' + line[i]);
+        console.log('\t'+i+' : ' + line[i].substr(0, 40) + ' ...'); // cut string (too long. he rape my logs)
         Tweets.push(line[i].replace(/<br>/gi, '\n'));
     }
     if (Tweets.length > 0) {
-        Main(client);
+        return Main;
     }
 }
 
@@ -25,7 +25,7 @@ function Main(client) {
     }, function (error, tweet, response) {
         if (error)  console.error(error);
         else {
-            console.log('\tTweet published : ' + tweet.user.screen_name + ' ［ ' + tweet.text + ' ]');
+            console.log('Tweet published : ' + tweet.user.screen_name + ' ［ ' + tweet.text.replace(/\n/gi, '<br>').substr(0, 40) + ' ]' + ' ...');
         }
         setTimeout(function () { Main(client); }, Number(AppInfo.get('Duration')) + Random.integer(-Number(AppInfo.get('Tolerance')), Number(AppInfo.get('Tolerance')))(mt));
     });
