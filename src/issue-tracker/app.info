@@ -1,0 +1,6 @@
+﻿save_keyword=(저장용)
+load_keyword=이슈 불러오기
+default_load_issue_number=3
+load_issue_number_start_regex=([0-9])+부터
+load_issue_number_end_regex=([0-9])+까지
+get_issue_count_keword=저장된 이슈

@@ -1,34 +1,38 @@
-﻿var AppInfo;
+﻿var logger = require('./../logger.js');
+var AppInfo;
 var Random = require('random-js');
 var mt = Random.engines.mt19937();
 mt.autoSeed();
 
 module.exports = function Run(dir, client, owners) {
-    console.log("! Tweak 'Gisuktime' Loading...");
+    logger("! Tweak 'Gisuktime' Loading...");
     AppInfo = require('./../appinfo-loader.js').Load(dir);
 
     var RegStrs = [];
     var line = require('fs-sync').read(dir + '/strings', 'utf8').split('\n');
     for (var i = 0; i < line.length; i++) {
+        line[i] = line[i].trim(); // remove blank
         RegStrs.push(new RegExp(line[i].replace(/ /g, ''), 'i'));
-        console.log('\t' + i + ' : ' + RegStrs[i]);
+        logger('\t' + i + ' : ' + RegStrs[i]);
     }
 
     return function (tweet) {
         if (owners.indexOf(tweet.user.id_str) != -1) { // is owner's tweet
-            for (var i = 0; i < RegStrs.length; i++) {
-                if (RegStrs[i].test(tweet.text.replace(/ /g, ''))) {
-                    client.post('statuses/update', {
-                        in_reply_to_status_id: tweet.id_str,
-                        status:
-                            '@' + tweet.user.screen_name + ' ' + GetGisukString()
-                    }, function (error, rtweet, response) {
-                        if (error) console.error(error);
-                        else {
-                            console.log('Mention Gisuktime to @' + tweet.user.screen_name);
-                        }
-                    });
-                    break;
+            if (tweet.in_reply_to_status_id == undefined) {
+                for (var i = 0; i < RegStrs.length; i++) {
+                    if (RegStrs[i].test(tweet.text.replace(/ /g, ''))) {
+                        client.post('statuses/update', {
+                            in_reply_to_status_id: tweet.id_str,
+                            status:
+                                '@' + tweet.user.screen_name + ' ' + GetGisukString()
+                        }, function (error, rtweet, response) {
+                            if (error) console.error(error);
+                            else {
+                                logger('Mention Gisuktime to @' + tweet.user.screen_name);
+                            }
+                        });
+                        break;
+                    }
                 }
             }
         }
