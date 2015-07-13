@@ -1,9 +1,5 @@
 ﻿var logger = require('./../logger.js');
 var AppInfo;
-var Random = require('random-js');
-var mt = Random.engines.mt19937();
-mt.autoSeed();
-
 
 module.exports = function Run(dir, client, owners) {
     logger("! Tweak 'Timeline-ReAction' Loading...");
@@ -21,7 +17,7 @@ module.exports = function Run(dir, client, owners) {
         input.push(new RegExp(item[1].replace(/ /g, ''), 'i'));
         output.push(item[2]);
 
-        logger("\t" + i + ' : (' + Category[i] + ') '+ input[i] + ' > ' + output[i]);
+        logger("\t" + i + ' : (' + Category[i] + ') ' + input[i] + ' > ' + output[i]);
     }
 
     return function (tweet, user) {
@@ -30,7 +26,7 @@ module.exports = function Run(dir, client, owners) {
             for (var i = 0; i < input.length; i++) {
 
                 if (input[i].test(tweet.text.replace(/ /g, ''))) { // remove space
-                    if  (Category[i] == "All" ||
+                    if (Category[i] == "All" ||
                         (Category[i] == "Mention" && tweet.in_reply_to_user_id_str == user.id_str) ||
                         (Category[i] == "Public" && tweet.in_reply_to_status_id == undefined)) //Category Parse
                     {
@@ -40,14 +36,14 @@ module.exports = function Run(dir, client, owners) {
             }
 
             if (outputs.length > 0) {
-                var r = Random.integer(0, outputs.length - 1)(mt);
+                var r = Math.floor(Math.random() * outputs.length);
                 client.post('statuses/update', {
                     in_reply_to_status_id: tweet.id_str,
                     status:
-                    '@' + tweet.user.screen_name + ' ' + output[outputs[r]]
+                    ParseEscapeString(output[outputs[r]], tweet)
                 }, function (error, rtweet, response) {
                     if (error) {
-                        logger('TLR Failed [ @' + tweet.user.screen_name + ' : ' + tweet.text.replace(/\n/gi, '<br>') + ' > '+ output[outputs[r]]);
+                        logger('TLR Failed [ @' + tweet.user.screen_name + ' : ' + tweet.text.replace(/\n/gi, '<br>') + ' > ' + ParseEscapeString(output[outputs[r]], tweet));
                         console.error(error);
                     }
                     else {
@@ -55,6 +51,15 @@ module.exports = function Run(dir, client, owners) {
                     }
                 });
             }
-         }
+        }
     };
+}
+
+function ParseEscapeString(string, tweet) {
+
+    if (!/:NotMention:/.test(output)) output = '@' + tweet.user.screen_name + ' ' + +output;
+    var output = string
+        .replace(/(:Tweet_Username:)/gi, tweet.user.name)
+        .replace(/:Tweet_Text:/gi, tweet.text);
+    return output;
 }

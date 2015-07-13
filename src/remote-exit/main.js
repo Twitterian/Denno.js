@@ -1,8 +1,5 @@
 ﻿var logger = require('./../logger.js');
 var AppInfo;
-var Random = require('random-js');
-var mt = Random.engines.mt19937();
-mt.autoSeed();
 
 module.exports = function Run(dir, owners) {
     logger("! Tweak 'Remote-Exit' Loading...");

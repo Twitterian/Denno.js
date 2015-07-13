@@ -1,8 +1,5 @@
 ﻿var logger = require('./../logger.js');
 var AppInfo;
-var Random = require('random-js');
-var mt = Random.engines.mt19937();
-mt.autoSeed();
 
 module.exports = function Run(dir, client, owners) {
     logger("! Tweak 'Gisuktime' Loading...");
@@ -41,8 +38,8 @@ module.exports = function Run(dir, client, owners) {
 
 function GetGisukString() {
     var current = require('./../syncedtime.js')();
-    var target = GetNextIndipendanceDay(current);
-    var ref = target.getTime() - current.getTime();
+    var IndependenceDate = GetNextIndipendanceDay(current);
+    var ref = IndependenceDate.date.getTime() - current.getTime();
     var milisec = parseInt(ref % 1000);
     ref /= 1000;
     var sec = parseInt(ref % 60);
@@ -54,17 +51,23 @@ function GetGisukString() {
     ref = parseInt(ref);
 
     var str = '';
+    str += (IndependenceDate.toDormitory)?'기숙사긔까지 겨우 ':'집사긔까지 무려 ';
     if (ref > 0) str += ref + '일 ';
     if (hour > 0) str += hour + '시간 ';
     if (min > 0) str += min + '분 ';
     if (sec > 0) str += sec + '초 ';
-    str += milisec + '밀리초 남았습니다';
-
+    str += milisec + '밀리초';
+    str += (IndependenceDate.toDormitory) ? '밖에 안' : '씩이나 ';
+    str += '남았습니다';
     return str;
 }
 
 function GetNextIndipendanceDay(date) {
-    var toDormitory = false;
+    var Independence= {
+        toDormitory: false,
+        date: undefined
+    };
+
     var weekday = date.getDay();
     var hour = date.getHours();
     var min = date.getMinutes();
@@ -72,24 +75,23 @@ function GetNextIndipendanceDay(date) {
     if (weekday < 0) { weekday = 6; }
     if (weekday == 4) {
         if (hour > 17 || (hour == 17 && min >= 30)) {
-            toDormitory = true;
+            Independence.toDormitory = true;
         }
     }
     else if (weekday == 5) {
-        toDormitory = true;
+        Independence.toDormitory = true;
     }
     else if (weekday == 6) {
         if (hour < 21) {
-            toDormitory = true;
+            Independence.toDormitory = true;
         }
     }
 
-    var IndipendanceDay;
 
-    if (toDormitory == true) // goto GISUKSA;
+    if (Independence.toDormitory == true) // goto GISUKSA;
     {
         var day = date.getDate() + (6 - weekday);
-        IndipendanceDay = new Date(date.getFullYear(), date.getMonth(), day, 21);
+        Independence.date = new Date(date.getFullYear(), date.getMonth(), day, 21);
     }
     else // goto HOME;
     {
@@ -100,8 +102,8 @@ function GetNextIndipendanceDay(date) {
         else if (weekday > 4) {
             day += weekday;
         }
-        IndipendanceDay = new Date(date.getFullYear(), date.getMonth(), day, 18, 30);
+        Independence.date = new Date(date.getFullYear(), date.getMonth(), day, 18, 30);
     }
 
-    return IndipendanceDay;
+    return Independence;
 }

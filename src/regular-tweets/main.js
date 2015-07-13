@@ -1,9 +1,6 @@
 ﻿var logger = require('./../logger.js');
 var AppInfo;
 var Tweets = [];
-var Random = require('random-js');
-var mt = Random.engines.mt19937();
-mt.autoSeed();
 
 module.exports = function Run(dir) {
     logger("! Tweak 'Regular-Tweets' Loading...");
@@ -20,7 +17,8 @@ module.exports = function Run(dir) {
 }
 
 function Main(client) {
-    var r = Random.integer(0, Tweets.length-1)(mt);
+    var r = Math.floor(Math.random() * Tweets.length);
+
     client.post('statuses/update', {
         status: Tweets[r]
     }, function (error, tweet, response) {
@@ -28,6 +26,6 @@ function Main(client) {
         else {
             logger('Tweet published : ' + tweet.user.screen_name + ' ［ ' + tweet.text.replace(/\n/gi, '<br>') + ' ]' + ' ...');
         }
-        setTimeout(function () { Main(client); }, Number(AppInfo.get('Duration')) + Random.integer(-Number(AppInfo.get('Tolerance')), Number(AppInfo.get('Tolerance')))(mt));
+        setTimeout(function () { Main(client); }, Number(AppInfo.get('Duration')) + Math.floor(-Number(AppInfo.get('Tolerance')), Number(AppInfo.get('Tolerance'))));
     });
 }

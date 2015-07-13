@@ -43,5 +43,3 @@ Temporary Items
 .apdisk
 
 node_modules/
-src/app.info.debug
-src/app.info.release

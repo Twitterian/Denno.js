@@ -29,12 +29,11 @@ for (var i = 0; i < line.length; i++) {
     logger('\t' + i + ' : ' + line[i]);
     Owners.push(line[i]);
 }
-
 client.get('account/verify_credentials', {}, function (error, user, response) {
     if (error) console.error(error);
     else {
         var run = true;
-        logger('\t\tLogged in : ' + user.name + '(@' + user.screen_name + ' ' + user.id_str + ')\n');  // Raw response object. 
+        logger('\tLogged in : ' + user.name + '(@' + user.screen_name + ' ' + user.id_str + ')\n');  // Raw response object. 
 
         // Load tweaks
         var reg_tweet = require('./src/regular-tweets/main.js')('./src/regular-tweets');
@@ -42,29 +41,37 @@ client.get('account/verify_credentials', {}, function (error, user, response) {
         var tl_reaction = require('./src/timeline-reaction/main.js')('./src/timeline-reaction', client, Owners);
         var remote_exit = require('./src/remote-exit/main.js')('./src/remote-exit', Owners);
         var issue_tracker = require('./src/issue-tracker/main.js')('./src/issue-tracker', client, Owners);
+        var time_tweet = require('./src/time-tweet/main.js')('./src/time-tweet', client);
 
         reg_tweet(client);
-        
-        client.stream('user', { replies: 'all' }, function (stream) {
-            
-            stream.on('data', function (tweet) {
-                if (tweet.source != undefined &&
-                    tweet.event == undefined &&
-                    tweet.retweeted_status == undefined) {
-                    run = remote_exit(tweet, run);
-                    if (run)
-                    {
-                        gisuktime(tweet);
-                        tl_reaction(tweet, user);
-                        issue_tracker(tweet);
+        time_tweet(client);
+
+        // Stream functions
+        var ConnectStream = function () {
+            client.stream('user', { replies: 'all' }, function (stream) {
+                stream.on('data', function (res) {
+                    if (res.source != undefined &&
+                        res.event == undefined &&
+                        res.retweeted_status == undefined) {
+                        run = remote_exit(res, run);
+                        if (run) {
+                            gisuktime(res);
+                            tl_reaction(res, user);
+                            //issue_tracker(res);
+                        }
                     }
-                }
+                    else if (res.disconnect != undefined) {
+                        ConnectStream();
+                    }
+                });
+
+                stream.on('error', function (error) {
+                    console.error(error);
+                });
             });
-
-            stream.on('error', function (error) { console.error(error); });
-        });
-
-    }
+        }
+        ConnectStream();
+    };
 });
 
 logger("! index.js EOF !");

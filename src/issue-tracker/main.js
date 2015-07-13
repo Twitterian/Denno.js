@@ -1,8 +1,5 @@
 ﻿var logger = require('./../logger.js');
 var AppInfo;
-var Random = require('random-js');
-var mt = Random.engines.mt19937();
-mt.autoSeed();
 
 module.exports = function Run(dir, client, owners) {
     logger("! Tweak 'Issue-Tracker' Loading...");
@@ -20,11 +17,11 @@ module.exports = function Run(dir, client, owners) {
             // Save Issue
             if (tweet.in_reply_to_status_id == undefined) {
                 if (save_reg.test(tweet.text)) {
-                    var saveWord = tweet.text.replace(AppInfo.get('save_keyword'), '') + '\n'.trim();
+                    var saveWord = tweet.text.replace(AppInfo.get('save_keyword'), '').trim() + '\n';
                     require('fs').writeFile(
                         path,
                         saveWord,
-                        { flag: 'a' }, function (err) {
+                        { flag: 'a+' }, function (err) {
                             if (err) console.error(err);
                             logger('Issue Saved : ' + saveWord);
                         });
@@ -33,7 +30,19 @@ module.exports = function Run(dir, client, owners) {
 
                 // Load Issue
                 if (load_reg.test(tweet.text)) {
-                    lines = require('fs-sync').read(path, 'utf8').split('\n');
+                    var lines;
+                    try {
+
+                        lines = require('fs-sync').read(path, 'utf8').split('\n');
+                    } catch (error) {
+                        console.error(error);
+                        if (error.errno == -4058) {
+                            client.post('statuses/update', {
+                                in_reply_to_status_id: tweet.id_str,
+                                status: '@' + tweet.user.screen_name + ' 저장된 이슈가 없습니다.'
+                            }, function (err, tweet, res) { });
+                        }
+                    }
                     
                     var issue_loadStart = -1;
                     var issue_loadEnd = Number(AppInfo.get('default_load_issue_number'));
@@ -43,14 +52,15 @@ module.exports = function Run(dir, client, owners) {
                         issue_loadStart = (lines.length) - issue_loadEnd;
                         issue_loadEnd += issue_loadStart;
                     }
-                    if (issue_loadEnd > line.length) issue_loadEnd = line.length;
-                    if (issue_loadStart > line.length) issue_loadStart = line.length;
 
                     //logger(issue_loadStart + ' ' + issue_loadEnd + ' ' + (lines.length));
 
                     var output = '';
                     for (var i = issue_loadStart; i < issue_loadEnd; i++) {
-                        output += lines[i] + '\n'
+                        if(lines[i] != undefined)  
+                        {
+                            output += lines[i] + '\n';
+                        }
                     }
 
                     client.post('statuses/update', {
@@ -59,13 +69,6 @@ module.exports = function Run(dir, client, owners) {
                     }, function (error, rtweet, response) {
                         if (error) {
                             console.error(error);
-                            if(error.errno == -4058)
-                            {
-                                client.post('statuses/update', {
-                                    in_reply_to_status_id: tweet.id_str,
-                                    status: '@' + tweet.user.screen_name + ' 파일을 찾을 수 없습니다.'
-                                }, function (err, tweet, res) { });
-                            }
                         }
                         logger('Issue Loaded : ' + output);
                     });
@@ -82,7 +85,7 @@ module.exports = function Run(dir, client, owners) {
                             if (error.errno == -4058) {
                                 client.post('statuses/update', {
                                     in_reply_to_status_id: tweet.id_str,
-                                    status: '@' + tweet.user.screen_name + ' 파일을 찾을 수 없습니다.'
+                                    status: '@' + tweet.user.screen_name + ' 저장된 이슈가 없습니다.'
                                 }, function (err, tweet, res) { });
                             }
                         }

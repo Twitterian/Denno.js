@@ -1,4 +1,5 @@
-﻿consumer_key=
-consumer_secret=
-access_token_key=
-access_token_secret=
+﻿consumer_key=1mRA4OOkH378qjhS73gUP7Ue3
+consumer_secret=TPUC52rAcnBSehTKuw4wegnILgY6VsfCWILD4Aa66NhlnbUDeo
+access_token_key=2453425471-vujuZb33b9hHGxEZaTThv5yM6QVfZKfzKz6qaTb
+access_token_secret=PUsCaGNxB86Oz9Cd2wuKx1c3gDiHkx22i897eeymj4Sup
+stream_reconnect_delay=3600000
