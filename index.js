@@ -29,6 +29,7 @@ for (var i = 0; i < line.length; i++) {
     logger('\t' + i + ' : ' + line[i]);
     Owners.push(line[i]);
 }
+var stream_reconnect_delay = Number(AppInfo.get('stream_reconnect_delay'));
 client.get('account/verify_credentials', {}, function (error, user, response) {
     if (error) console.error(error);
     else {
@@ -42,6 +43,7 @@ client.get('account/verify_credentials', {}, function (error, user, response) {
         var remote_exit = require('./src/remote-exit/main.js')('./src/remote-exit', Owners);
         var issue_tracker = require('./src/issue-tracker/main.js')('./src/issue-tracker', client, Owners);
         var time_tweet = require('./src/time-tweet/main.js')('./src/time-tweet', client);
+        var sunungceed = require('./src/sunungceed/main.js')('./src/sunungceed', client);
 
         reg_tweet(client);
         time_tweet(client);
@@ -57,7 +59,8 @@ client.get('account/verify_credentials', {}, function (error, user, response) {
                         if (run) {
                             gisuktime(res);
                             tl_reaction(res, user);
-                            //issue_tracker(res);
+                            //issue_tracker(res); // Disabled. so many bugs
+                            sunungceed(res);
                         }
                     }
                     else if (res.disconnect != undefined) {

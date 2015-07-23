@@ -37,29 +37,44 @@ module.exports = function Run(dir, client, owners) {
 
             if (outputs.length > 0) {
                 var r = Math.floor(Math.random() * outputs.length);
-                client.post('statuses/update', {
-                    in_reply_to_status_id: tweet.id_str,
-                    status:
-                    ParseEscapeString(output[outputs[r]], tweet)
-                }, function (error, rtweet, response) {
-                    if (error) {
-                        logger('TLR Failed [ @' + tweet.user.screen_name + ' : ' + tweet.text.replace(/\n/gi, '<br>') + ' > ' + ParseEscapeString(output[outputs[r]], tweet));
-                        console.error(error);
-                    }
-                    else {
-                        logger('TLR [ @' + tweet.user.screen_name + ' : ' + tweet.text.replace(/\n/gi, '<br>') + ' > ' + rtweet.text.replace(/\n/gi, '<br>') + ' ]');
-                    }
-                });
+                var res = ParseEscapeString(output[outputs[r]], tweet);
+                if (res.flag) {
+                    client.post('statuses/update', {
+                        in_reply_to_status_id: tweet.id_str,
+                        status: res.string
+                    }, function (error, rtweet, response) {
+                        if (error) {
+                            logger('TLR Failed [ @' + tweet.user.screen_name + ' : ' + tweet.text.replace(/\n/gi, '<br>') + ' > ' + res.string);
+                            console.error(error);
+                        }
+                        else {
+                            logger('TLR [ @' + tweet.user.screen_name + ' : ' + tweet.text.replace(/\n/gi, '<br>') + ' > ' + rtweet.text.replace(/\n/gi, '<br>') + ' ]');
+                        }
+                    });
+                }
             }
         }
     };
 }
 
 function ParseEscapeString(string, tweet) {
+    var output = { string: undefined, flag: true };
 
-    if (!/:NotMention:/.test(output)) output = '@' + tweet.user.screen_name + ' ' + +output;
-    var output = string
-        .replace(/(:Tweet_Username:)/gi, tweet.user.name)
-        .replace(/:Tweet_Text:/gi, tweet.text);
+    output.string = string
+    // :Tweet_Username:
+        .replace(/:Tweet_Username:/gi, tweet.user.name);
+
+    // :NotMention:
+    if (!/:NotMention:/.test(output.string)) 
+    {
+        output.string = '@' + tweet.user.screen_name + ' ' + output.string;
+    }
+    output.string = output.string.replace(/:NotMention:/, '');
+
+    // :Pakuri:
+    if (/:Pakuri:/.test(output.string)) {
+        output.string = output.string.replace(/:Pakuri:/gi, tweet.text.replace(/[^(가-힣|ㄱ-ㅎ|ㅏ-ㅣ|\s)]/gi, ''));
+    }
+
     return output;
 }
